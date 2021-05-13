@@ -10,4 +10,4 @@ This repository is used to develop an actual VoIP session that will be later int
 4. [JRTPLIB](https://github.com/j0r1/JRTPLIB) 
 
 ## Rights and Liscences
-As this project is intended to be integrated into LockVox, it therefore has to be fully open source and GNU compliant
+As this project is intended to be integrated into LockVox, it therefore has to be fully open source and GPL compliant
