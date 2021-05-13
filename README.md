@@ -1,4 +1,6 @@
-# LVAudioSession
+![License](https://img.shields.io/github/license/ValentinGrim/LockVox)
+
+# LVAudioSession Project
 This repository is used to develop an actual VoIP session that will be later integrated into the [LockVox](https://github.com/ValentinGrim/LockVox) project
 
 ## Libraries used
