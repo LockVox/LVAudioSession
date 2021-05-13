@@ -35,14 +35,14 @@ unix {
 }
 !isEmpty(target.path): INSTALLS += target
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../locallibs/lib/ -lopus
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/libs/lib -lopus
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../locallibs/lib/ -lopusd
 
-INCLUDEPATH += D:\Projets\locallibs\lib
-DEPENDPATH += D:\Projets\locallibs\lib
+INCLUDEPATH += $$PWD\libs\header\opus
+DEPENDPATH +=  $$PWD\libs\lib
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../locallibs/lib/ -lportaudio_x86
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/libs/lib -lportaudio_x86
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../locallibs/lib/ -lportaudio_x86d
 
-INCLUDEPATH += $$PWD/../locallibs
-DEPENDPATH += $$PWD/../locallibs
+INCLUDEPATH += $$PWD\libs\header\portaudio
+DEPENDPATH += $$PWD\libs\lib
