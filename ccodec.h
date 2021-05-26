@@ -3,6 +3,9 @@
 
 #include "config.h"
 #include "opus.h"
+#include "opus_defines.h"
+#include "opus_types.h"
+#include <QQueue>
 
 class TEST_LIB_EXPORT CCodec
 {
@@ -11,8 +14,27 @@ public:
     CCodec();
     ~CCodec();
 
+    void EncodeFromHardware();   //Encode data to unsigned char format and empties queue buffer
+    void DecodeToHardware();      //Decode data to float format and fill queue buffer
+
+
+    const float* from_pFloat();     //From local float pointer
+    void to_pFloat(float* p_in, int size);  //Writes to the outHardwareBuffer
+    const unsigned char* from_pChar();
+    void to_pChar(unsigned char* p_in, int size); //From local  char pointer
+
 private:
     OpusEncoder* opusenc;
+    OpusDecoder* opusdec;
+    int errCode;
+    QQueue<float>* inHardwareBuffer;         //Shared buffer with PA component
+    QQueue<float>* outHardwareBuffer;       //Shared buffer with PA component
+    QQueue<char>* inNetBuffer;                  //Shared buffer with RTP component
+    QQueue<char>* outNetBuffer;                //Shared buffer with RTP component
+    const int bufsize = OPUS_BUFFER_SIZE;
+    int max_outsize = OPUS_BUFFER_SIZE;
+    int in_index;
+    int out_index;
 };
 
 #endif // CCODEC_H

@@ -38,9 +38,44 @@ void CHardwareSound::start()
     checkError();
 }
 
-int CHardwareSound::PACallback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData)
+typedef struct
 {
-    return 0;
+    int          frameIndex;  /* Index into sample array. */
+    int          maxFrameIndex;
+    SAMPLE      *recordedSamples;
+}
+paTestData;
+
+int CHardwareSound::PACallback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData) // Silences in case no data is received
+{
+        (void) output; /*Prevent unused variable warnings.*/
+        (void) timeInfo;
+        (void) statusFlags;
+        (void) userData;
+
+         paTestData *data = (paTestData*)userData;
+        const SAMPLE *rptr = (const SAMPLE*)input;      //Read pointer
+        SAMPLE *wptr = &data->recordedSamples[data->frameIndex * NUM_CHANNELS]; //Write pointer
+        long framesToCalc;
+        long i;
+        int finished;
+        unsigned long framesLeft = data->maxFrameIndex - data->frameIndex;
+        if( framesLeft < frameCount )
+        {
+            framesToCalc = framesLeft;
+            finished = paComplete;
+        }
+        else
+        {
+            framesToCalc = frameCount;
+            finished = paContinue;
+        }
+    for( i=0; i<framesToCalc; i++ )
+    {
+        *wptr++ = SAMPLE_SILENCE;
+        if( NUM_CHANNELS == 2 ) *wptr++ = SAMPLE_SILENCE;   //1 for each channel
+    }
+    return finished;
 }
 
 void CHardwareSound::GetAvailableDevices()
