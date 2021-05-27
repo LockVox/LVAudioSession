@@ -1,7 +1,6 @@
 #ifndef LVAUDIOSESSION_H
 #define LVAUDIOSESSION_H
 #include "config.h"
-
 #include "opus.h"
 #include "portaudio.h"
 #include <QQueue>

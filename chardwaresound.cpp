@@ -38,14 +38,16 @@ void CHardwareSound::start()
     checkError();
 }
 
-typedef struct
-{
-    int          frameIndex;  /* Index into sample array. */
-    int          maxFrameIndex;
-    SAMPLE      *recordedSamples;
-}
-paTestData;
-
+/*!
+ * \brief CHardwareSound::PACallback This function is a routine (called periodically) that writes and reads 'directly' to and from the hardware devices
+ * \param input This parametre is a pointer that points 'directly' to the microphone, this means that whatever your microphone records gets written to this pointer
+ * \param output    This parametre is a pointer that points 'directly' to the speaker, this means that whatever you are putting in this memory location is going to be played
+ * \param frameCount    This parametre defines the number of frames that
+ * \param timeInfo  Current timestamp
+ * \param statusFlags   Flags provided by PortAudio to indicate status of the engine's internal buffers
+ * \param userData  Field for custom data stuctures, this is where we will be able to access the external buffers
+ * \return
+ */
 int CHardwareSound::PACallback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData) // Silences in case no data is received
 {
         (void) output; /*Prevent unused variable warnings.*/
@@ -53,13 +55,14 @@ int CHardwareSound::PACallback(const void *input, void *output, unsigned long fr
         (void) statusFlags;
         (void) userData;
 
-         paTestData *data = (paTestData*)userData;
+         paUserData *data = (paUserData*)userData;
         const SAMPLE *rptr = (const SAMPLE*)input;      //Read pointer
-        SAMPLE *wptr = &data->recordedSamples[data->frameIndex * NUM_CHANNELS]; //Write pointer
+        rptr = NULL;
+        SAMPLE *wptr = &data->recordedSamples[data->headsetIndex * NUM_CHANNELS]; //Write pointer
         long framesToCalc;
         long i;
         int finished;
-        unsigned long framesLeft = data->maxFrameIndex - data->frameIndex;
+        unsigned long framesLeft = data->maxFrameIndex - data->headsetIndex;
         if( framesLeft < frameCount )
         {
             framesToCalc = framesLeft;
@@ -72,8 +75,9 @@ int CHardwareSound::PACallback(const void *input, void *output, unsigned long fr
         }
     for( i=0; i<framesToCalc; i++ )
     {
-        *wptr++ = SAMPLE_SILENCE;
-        if( NUM_CHANNELS == 2 ) *wptr++ = SAMPLE_SILENCE;   //1 for each channel
+        if(!output)     //if there's no sound received by the network ---> To rework
+            *wptr++ = SAMPLE_SILENCE;
+            if( NUM_CHANNELS == 2 ) *wptr++ = SAMPLE_SILENCE;   //1 for each channel
     }
     return finished;
 }
@@ -252,4 +256,26 @@ void CHardwareSound::PrintSupportedStandardSampleRate(const PaStreamParameters *
         printf( "None\n" );
     else
         printf( "\n" );
+}
+
+/*!
+ * \brief CHardwareSound::FromOutStream This function is used to grab data from the shared memory and give it to the callback function
+ * \param p_out
+ */
+void CHardwareSound::FromOutStream(SAMPLE* p_out)
+{
+    //Add threading
+    for(int i = 0 ; i < paFramesPerBufferUnspecified ; i++)
+    {
+        p_out[i] = userData->headsetBuffer->dequeue();
+    }
+    return;
+}
+
+void CHardwareSound::ToInputStream(SAMPLE* p_in, int index)
+{
+    for(int i = index ; i < index ; i++)    //De la daube je sais pas ce que je fais
+    {
+        userData->micBuffer->push_back(p_in [i]);
+    }
 }
