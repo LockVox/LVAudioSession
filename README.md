@@ -9,5 +9,7 @@ This repository is used to develop an actual VoIP session that will be later int
 3. [Opus](https://opus-codec.org/downloads/) - Audio CODEC module
 4. [JRTPLIB](https://github.com/j0r1/JRTPLIB)  - RTP CODEC module
 
+NB : This Qt project has been setup as library project, you will have to develop your own program for testing :)))))
+
 ## Rights and Liscences
 As this project is intended to be integrated into LockVox, it therefore has to be fully open source and GPL compliant
