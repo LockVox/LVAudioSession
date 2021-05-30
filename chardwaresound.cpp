@@ -23,6 +23,9 @@ CHardwareSound::~CHardwareSound()
     return;
 }
 
+/*!
+ * \brief CHardwareSound::checkError This function checks wether the operation was done correctly, prints the error otherwise
+ */
 void CHardwareSound::checkError()
 {
     if(errCode != paNoError)
@@ -32,6 +35,9 @@ void CHardwareSound::checkError()
     }
 }
 
+/*!
+ * \brief CHardwareSound::start This function is used to start the actual stream
+ */
 void CHardwareSound::start()
 {
     errCode = Pa_StartStream(ioStream);
@@ -43,7 +49,7 @@ void CHardwareSound::start()
  * \param input This parametre is a pointer that points 'directly' to the microphone, this means that whatever your microphone records gets written to this pointer
  * \param output    This parametre is a pointer that points 'directly' to the speaker, this means that whatever you are putting in this memory location is going to be played
  * \param frameCount    This parametre defines the number of frames that
- * \param timeInfo  Current timestamp
+ * \param timeInfo  Structure containing current time and internal audio ADC/DAC timestamps
  * \param statusFlags   Flags provided by PortAudio to indicate status of the engine's internal buffers
  * \param userData  Field for custom data stuctures, this is where we will be able to access the external buffers
  * \return
@@ -55,33 +61,18 @@ int CHardwareSound::PACallback(const void *input, void *output, unsigned long fr
         (void) statusFlags;
         (void) userData;
 
-         paUserData *data = (paUserData*)userData;
-        const SAMPLE *rptr = (const SAMPLE*)input;      //Read pointer
-        rptr = NULL;
-        SAMPLE *wptr = &data->recordedSamples[data->headsetIndex * NUM_CHANNELS]; //Write pointer
-        long framesToCalc;
-        long i;
-        int finished;
-        unsigned long framesLeft = data->maxFrameIndex - data->headsetIndex;
-        if( framesLeft < frameCount )
-        {
-            framesToCalc = framesLeft;
-            finished = paComplete;
-        }
-        else
-        {
-            framesToCalc = frameCount;
-            finished = paContinue;
-        }
-    for( i=0; i<framesToCalc; i++ )
-    {
-        if(!output)     //if there's no sound received by the network ---> To rework
-            *wptr++ = SAMPLE_SILENCE;
-            if( NUM_CHANNELS == 2 ) *wptr++ = SAMPLE_SILENCE;   //1 for each channel
-    }
-    return finished;
-}
+        paUserData *data = (paUserData*)userData;
+        SAMPLE *rptr = (SAMPLE*)input;      //Read pointer
+        SAMPLE* wptr = (SAMPLE*)output;
 
+        /* Send and retreive info to and from the shared buffers */
+        ToInputStream(rptr, frameCount);
+        FromOutStream(wptr, frameCount);
+    return 0;
+}
+/*!
+ * \brief CHardwareSound::GetAvailableDevices This function prints the different available devices
+ */
 void CHardwareSound::GetAvailableDevices()
 {
         int i, numDevices, defaultDisplayed;
@@ -260,22 +251,29 @@ void CHardwareSound::PrintSupportedStandardSampleRate(const PaStreamParameters *
 
 /*!
  * \brief CHardwareSound::FromOutStream This function is used to grab data from the shared memory and give it to the callback function
- * \param p_out
+ * \param p_out Pointer to the actual headphone buffer
+ * \param p_size Size of the data to process
  */
-void CHardwareSound::FromOutStream(SAMPLE* p_out)
+void CHardwareSound::FromOutStream(SAMPLE* p_out, int p_size)
 {
-    //Add threading
-    for(int i = 0 ; i < paFramesPerBufferUnspecified ; i++)
+    for(int i = 0 ; i < p_size ; i++)
     {
         p_out[i] = userData->headsetBuffer->dequeue();
     }
     return;
 }
 
-void CHardwareSound::ToInputStream(SAMPLE* p_in, int index)
+/*!
+ * \brief CHardwareSound::ToInputStream This function is used to insert the microphone data into the shared buffer
+ * \param p_in  Pointer to the actual microphone buffer
+ * \param p_size Size of the data to process
+ */
+void CHardwareSound::ToInputStream(SAMPLE* p_in, int p_size)
 {
-    for(int i = index ; i < index ; i++)    //De la daube je sais pas ce que je fais
-    {
-        userData->micBuffer->push_back(p_in [i]);
-    }
+    if(p_in)
+        for(int i = 0 ; i < p_size ; i++)
+        {
+            userData->micBuffer->push_back(p_in [i]);
+        }
+    return;
 }

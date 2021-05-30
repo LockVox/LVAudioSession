@@ -28,13 +28,19 @@ public:
     ~CHardwareSound();
     void start();
     void checkError();
-    static int PACallback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData );
+    int PACallback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void *userData );
     void GetAvailableDevices();
     static void PrintSupportedStandardSampleRate(const PaStreamParameters *inputParameters, const PaStreamParameters *outputParameters);
 
-    void FromOutStream(SAMPLE* p_out);
+    //These functions are used to grab and insert the audio data in/to the shared buffers
+    void FromOutStream(SAMPLE* p_out, int p_size);
+    void ToInputStream(SAMPLE* p_in, int p_size);
 
-    void ToInputStream(SAMPLE* p_in, int index);
+    //Getter + Setters
+    PaStream* GetStream();
+    void SetStream(PaStream* p_stream);
+    paUserData* GetUserData();
+    void SetUserData(paUserData* p_userData);
 
 private:
     PaStream *ioStream;

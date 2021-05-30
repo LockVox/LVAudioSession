@@ -20,6 +20,7 @@ DEFINES += MAKE_TEST_LIB
 SOURCES += \
     ccodec.cpp \
     chardwaresound.cpp \
+    crtpcomp.cpp \
     lvaudiosession.cpp \
     main.cpp
 
@@ -27,6 +28,7 @@ HEADERS += \
     ccodec.h \
     chardwaresound.h \
     config.h \
+    crtpcomp.h \
     lvaudiosession.h
 
 # Default rules for deployment.

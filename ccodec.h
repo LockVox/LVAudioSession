@@ -18,9 +18,9 @@ public:
     void DecodeToHardware();      //Decode data to float format and fill queue buffer
 
 
-    const float* from_pFloat();     //From local float pointer
-    void to_pFloat(float* p_in, int size);  //Writes to the outHardwareBuffer
-    const unsigned char* from_pChar();
+    float* from_pFloat(int size);     //From local float pointer
+    void to_pFloat(float* p_out, int size);  //Writes to the outHardwareBuffer
+    const unsigned char* from_pChar(int size);
     void to_pChar(unsigned char* p_in, int size); //From local  char pointer
 
 private:
