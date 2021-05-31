@@ -7,6 +7,9 @@
 #include "opus_types.h"
 #include <QQueue>
 
+/*!
+ * \brief The CCodec class is used to encode and decode+mix audio streams
+ */
 class TEST_LIB_EXPORT CCodec
 {
 public:

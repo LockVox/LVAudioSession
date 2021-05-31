@@ -21,6 +21,10 @@ typedef struct {
      SAMPLE* receivedSamples;   //an array of samples received from the network
 }paUserData;
 
+/*!
+ * \brief The CHardwareSound class is used to communicate with audio devices (read+write)
+ */
+
 class TEST_LIB_EXPORT CHardwareSound
 {
 public:
