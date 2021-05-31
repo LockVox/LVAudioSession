@@ -12,7 +12,6 @@ This repository is used to develop an actual VoIP session that will be later int
 NB : This Qt project has been setup as library project, you will have to develop your own program for testing :)))))
 
 ## Workflow (TBF)
-![Workflow](https://github.com/hyugzz/LVAudioSession/blob/master/LVAS_Client.png)
 
 ## Rights and Liscences
 As this project is intended to be integrated into LockVox, it therefore has to be fully open source and GPL compliant
