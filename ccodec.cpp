@@ -38,7 +38,7 @@ void CCodec::DecodeToHardware()
     int outsize = 0;
     if(!out)
         out = (float*)calloc(max_outsize, sizeof(float));
-    outsize = opus_decode_float(opusdec, from_pChar(), bufsize, out, max_outsize/2, 0);
+    outsize = opus_decode_float(opusdec, from_pChar(bufsize), bufsize, out, max_outsize/2, 0);
 }
 
 /*!

@@ -1,8 +1,5 @@
 QT -= gui
 
-TEMPLATE = lib
-CONFIG += staticlib
-
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -37,14 +34,29 @@ unix {
 }
 !isEmpty(target.path): INSTALLS += target
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/libs/lib -lopus
-#else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../locallibs/lib/ -lopusd
 
-INCLUDEPATH += $$PWD\libs\header\opus
-DEPENDPATH +=  $$PWD\libs\lib
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/libs/lib/ -ljrtplib
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/libs/lib/ -ljrtplibd
+else:unix:!macx: LIBS += -L$$PWD/libs/lib/ -ljrtplib
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/libs/lib -lportaudio_x86
-#else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../locallibs/lib/ -lportaudio_x86d
+INCLUDEPATH += $$PWD/libs/header/jrtplib
+DEPENDPATH += $$PWD/libs/header/jrtplib
 
-INCLUDEPATH += $$PWD\libs\header\portaudio
-DEPENDPATH += $$PWD\libs\lib
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/libs/lib/ -ljthread
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/libs/lib/ -ljthreadd
+else:unix:!macx: LIBS += -L$$PWD/libs/lib/ -ljthread
+
+INCLUDEPATH += $$PWD/libs/header/jthread
+DEPENDPATH += $$PWD/libs/header/jthread
+
+unix:!macx|win32: LIBS += -L$$PWD/libs/lib/ -lopus
+
+INCLUDEPATH += $$PWD/libs/header/opus
+DEPENDPATH += $$PWD/libs/lib/opus
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/libs/lib/ -lportaudio_x64
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/libs/lib/ -lportaudio_x64d
+else:unix:!macx: LIBS += -L$$PWD/libs/lib/ -lportaudio_x64
+
+INCLUDEPATH += $$PWD/libs/header/portaudio
+DEPENDPATH += $$PWD/libs/header/portaudio

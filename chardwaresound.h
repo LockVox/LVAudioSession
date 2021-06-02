@@ -11,7 +11,7 @@
   * This structure will be passed to the PortAudio callback function and allows to communicate with the LVAudioSession class
   * we do integrate these members because the PACallback function has to have a given format, refer to PortAudio documentation for further information
 */
-typedef struct {
+ typedef struct {
     QQueue<float>* micBuffer;       //Pointer to the shared buffer with OPUS
     QQueue<float>* headsetBuffer;//Pointer to the shared buffer with OPUS
      int micIndex;                          //Index to tell where we are in the local mic buffer

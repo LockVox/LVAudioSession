@@ -4,11 +4,21 @@
 #include <windows.h>
 #endif
 
+
+/*!
+ * \brief MyPaStreamCallback This function is used to avoid C3867 error when passing the callback function to PaOpenStream
+ */
+TEST_LIB_EXPORT int MyPaStreamCallback (const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData)
+{
+     CHardwareSound *myClass = reinterpret_cast<CHardwareSound*>(userData);
+     return myClass->PACallback(input, output, frameCount, timeInfo, statusFlags, myClass->GetUserData());
+}
+
 CHardwareSound::CHardwareSound()
 {
     errCode = Pa_Initialize();
     checkError();
-    errCode = Pa_OpenDefaultStream(&ioStream, 1, 2, paFloat32, 44100, paFramesPerBufferUnspecified, PACallback, NULL);
+    errCode = Pa_OpenDefaultStream(&ioStream, 1, 2, paFloat32, 44100, paFramesPerBufferUnspecified, MyPaStreamCallback, this);
     checkError();
 }
 
@@ -54,22 +64,25 @@ void CHardwareSound::start()
  * \param userData  Field for custom data stuctures, this is where we will be able to access the external buffers
  * \return
  */
-int CHardwareSound::PACallback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData) // Silences in case no data is received
+int CHardwareSound::PACallback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, unsigned long statusFlags, void *userData) // Silences in case no data is received
 {
         (void) output; /*Prevent unused variable warnings.*/
         (void) timeInfo;
         (void) statusFlags;
+        (void) frameCount;
         (void) userData;
 
-        paUserData *data = (paUserData*)userData;
         SAMPLE *rptr = (SAMPLE*)input;      //Read pointer
-        SAMPLE* wptr = (SAMPLE*)output;
+        SAMPLE* wptr = (SAMPLE*)output;  //Write pointer
 
-        /* Send and retreive info to and from the shared buffers */
-        ToInputStream(rptr, frameCount);
-        FromOutStream(wptr, frameCount);
-    return 0;
+
+        /* Send and retreive samples to and from the shared buffers */
+        ToInputStream(rptr, paFramesPerBufferUnspecified);
+        FromOutStream(wptr, paFramesPerBufferUnspecified);
+
+        return 0;
 }
+
 /*!
  * \brief CHardwareSound::GetAvailableDevices This function prints the different available devices
  */
@@ -81,7 +94,6 @@ void CHardwareSound::GetAvailableDevices()
         PaError err;
 
         printf( "PortAudio version: 0x%08X\n", Pa_GetVersion());
-        printf( "Version text: '%s'\n", Pa_GetVersionInfo()->versionText );
 
         numDevices = Pa_GetDeviceCount();
         if( numDevices < 0 )
@@ -210,7 +222,12 @@ void CHardwareSound::GetAvailableDevices()
         printf("----------------------------------------------\n");
         return;
 }
-
+/*!
+ * \brief CHardwareSound::PrintSupportedStandardSampleRate This function prints the supported standard sample rates (i.e.8000.0, 9600.0, 11025.0, 12000.0, 16000.0, 22050.0, 24000.0, 32000.0,
+        44100.0, 48000.0, 88200.0, 96000.0, 192000)
+ * \param inputParameters   Pointer to the input stream parameter
+ * \param outputParameters Pointer to the output stream parameter
+ */
 void CHardwareSound::PrintSupportedStandardSampleRate(const PaStreamParameters *inputParameters, const PaStreamParameters *outputParameters )
 {
     static double standardSampleRates[] = {
@@ -276,4 +293,9 @@ void CHardwareSound::ToInputStream(SAMPLE* p_in, int p_size)
             userData->micBuffer->push_back(p_in [i]);
         }
     return;
+}
+
+paUserData* CHardwareSound::GetUserData()
+{
+    return userData;
 }

@@ -11,7 +11,6 @@ class TEST_LIB_EXPORT LVAudioSession
 public:
     LVAudioSession();
     void GetInputSound();
-private:
 
     CCodec m_codec;
     CHardwareSound m_periph;
