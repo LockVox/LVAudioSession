@@ -1,9 +1,11 @@
 #ifndef CHARDWARESOUND_H
 #define CHARDWARESOUND_H
-#include "pa_hostapi.h"
+#include "pa_linux_alsa.h"
 #include "config.h"
 #include "portaudio.h"
-#include "pa_asio.h"
+#ifdef WIN32
+    #include "pa_asio.h"
+#endif
 #include <QQueue>
 
 

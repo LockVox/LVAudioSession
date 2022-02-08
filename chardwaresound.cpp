@@ -217,7 +217,7 @@ void CHardwareSound::GetAvailableDevices()
             }
         }
 
-        Pa_Terminate();
+        //Pa_Terminate();
 
         printf("----------------------------------------------\n");
         return;
