@@ -15,6 +15,7 @@ class TEST_LIB_EXPORT CCodec
 public:
 
     CCodec();
+    CCodec(QQueue<float>* p_mic, QQueue<float>* p_speaker, QQueue<char>* p_toInet,QQueue<char>* p_fromInet);
     ~CCodec();
 
     void EncodeFromHardware();   //Encode data to unsigned char format and empties queue buffer
@@ -34,7 +35,7 @@ private:
     QQueue<float>* outHardwareBuffer;       //Shared buffer with PA component
     QQueue<char>* inNetBuffer;                  //Shared buffer with RTP component
     QQueue<char>* outNetBuffer;                //Shared buffer with RTP component
-    const int bufsize = OPUS_BUFFER_SIZE;
+    int bufsize = OPUS_BUFFER_SIZE;
     int max_outsize = OPUS_BUFFER_SIZE;
     int in_index;
     int out_index;

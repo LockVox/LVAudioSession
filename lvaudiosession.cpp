@@ -3,4 +3,6 @@
 
 LVAudioSession::LVAudioSession()
 {
+    m_codec = CCodec(NULL, NULL, NULL, NULL);
+
 }

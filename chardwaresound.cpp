@@ -1,5 +1,6 @@
 #include "chardwaresound.h"
 #include <iostream>
+#include <QDebug>
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -14,6 +15,9 @@ TEST_LIB_EXPORT int MyPaStreamCallback (const void *input, void *output, unsigne
      return myClass->PACallback(input, output, frameCount, timeInfo, statusFlags, myClass->GetUserData());
 }
 
+/*!
+ * \brief CHardwareSound::CHardwareSound Default construtctor
+ */
 CHardwareSound::CHardwareSound()
 {
     errCode = Pa_Initialize();
@@ -22,10 +26,31 @@ CHardwareSound::CHardwareSound()
     checkError();
 }
 
+/*!
+ * \brief CHardwareSound::CHardwareSound Constructor integrating shared buffers
+ * \param p_in  Recorded data queue pointer
+ * \param p_out Played data queue pointer
+ */
+CHardwareSound::CHardwareSound(QQueue<float>* p_in, QQueue<float>* p_out)
+{
+    errCode = Pa_Initialize();
+    checkError();
+    errCode = Pa_OpenDefaultStream(&ioStream, 1, 2, paFloat32, 44100, paFramesPerBufferUnspecified, MyPaStreamCallback, this);
+    checkError();
+    inHardwareBuffer = p_in;
+    outHardwareBuffer = p_out;
+}
+
+/*!
+ * \brief CHardwareSound::~CHardwareSound Default destructor
+ */
 CHardwareSound::~CHardwareSound()
 {
-    errCode = Pa_StopStream(ioStream);
-    checkError();
+    if(Pa_IsStreamActive(ioStream))
+    {
+        errCode = Pa_StopStream(ioStream);
+        checkError();
+    }
     errCode = Pa_CloseStream(ioStream);
     checkError();
     errCode = Pa_Terminate();
@@ -73,12 +98,12 @@ int CHardwareSound::PACallback(const void *input, void *output, unsigned long fr
         (void) userData;
 
         SAMPLE *rptr = (SAMPLE*)input;      //Read pointer
-        SAMPLE* wptr = (SAMPLE*)output;  //Write pointer
+        SAMPLE *wptr = (SAMPLE*)output;  //Write pointer
 
 
         /* Send and retreive samples to and from the shared buffers */
         ToInputStream(rptr, paFramesPerBufferUnspecified);
-        FromOutStream(wptr, paFramesPerBufferUnspecified);
+        FromOutStream(wptr, OPUS_BUFFER_SIZE);
 
         return 0;
 }
@@ -222,6 +247,7 @@ void CHardwareSound::GetAvailableDevices()
         printf("----------------------------------------------\n");
         return;
 }
+
 /*!
  * \brief CHardwareSound::PrintSupportedStandardSampleRate This function prints the supported standard sample rates (i.e.8000.0, 9600.0, 11025.0, 12000.0, 16000.0, 22050.0, 24000.0, 32000.0,
         44100.0, 48000.0, 88200.0, 96000.0, 192000)
@@ -273,9 +299,12 @@ void CHardwareSound::PrintSupportedStandardSampleRate(const PaStreamParameters *
  */
 void CHardwareSound::FromOutStream(SAMPLE* p_out, int p_size)
 {
+    if(outHardwareBuffer->size() < p_size)
+        p_size = outHardwareBuffer->size();
+    qDebug() << "Out hardware : " << outHardwareBuffer->size();
     for(int i = 0 ; i < p_size ; i++)
     {
-        p_out[i] = userData->headsetBuffer->dequeue();
+        p_out[i] = outHardwareBuffer->dequeue();
     }
     return;
 }
@@ -295,6 +324,10 @@ void CHardwareSound::ToInputStream(SAMPLE* p_in, int p_size)
     return;
 }
 
+/*!
+ * \brief CHardwareSound::GetUserData
+ * \return Returns the user data
+ */
 paUserData* CHardwareSound::GetUserData()
 {
     return userData;

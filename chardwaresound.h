@@ -31,6 +31,7 @@ class TEST_LIB_EXPORT CHardwareSound
 {
 public:
     CHardwareSound();
+    CHardwareSound(QQueue<float>* p_in, QQueue<float>* p_out);
     ~CHardwareSound();
     void start();
     void checkError();
@@ -52,6 +53,9 @@ private:
     PaStream *ioStream;
     PaError errCode;
     paUserData* userData;
+    QQueue<float>* inHardwareBuffer;         //Shared buffer with OPUS component
+    QQueue<float>* outHardwareBuffer;       //Shared buffer with OPUS component
+
 };
 
 #endif // CHARDWARESOUND_H
